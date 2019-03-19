@@ -18,6 +18,17 @@
 
 using namespace android;
 
+procInfo * BpDemoClient::getServiceInfo(void) {
+    Parcel data, reply;
+
+    m_binder->transact(GET_PROCINFO_TRANSACTION, data, &reply);
+    m_proceinfo.pid = reply.readInt32();
+    strncpy(m_proceinfo.procName, reply.readCString(), sizeof(m_proceinfo.procName));
+    strncpy(m_proceinfo.serviceName, reply.readCString(), sizeof(m_proceinfo.serviceName));
+
+    return &m_proceinfo;
+}
+
 void BpDemoClient::setData(unsigned int dataValue) {
     Parcel data, reply;
 
@@ -71,6 +82,8 @@ int main(int argc, char * * argv) {
     bpDemoC.setData(10);
 
     ALOGE("getdata:%d", bpDemoC.getData());
+    procInfo * info =  bpDemoC.getServiceInfo();
+    ALOGE("getServiceInfo %d, %s, %s\n", info->pid, info->procName, info->serviceName);
 
     while(1) {
         usleep(2000*1000);

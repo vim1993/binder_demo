@@ -49,22 +49,41 @@ void BnDemoService::setData(unsigned int data) {
 }
 
 status_t BnDemoService::onTransact(uint32_t code, const Parcel & data, Parcel * reply, uint32_t flags) {
+
     switch(code) {
-        case SET_DATA_TRANSACTION:
-            setData(data.readInt32());
-            sendEvent(1, 0);
+        case SET_DATA_TRANSACTION: {
+                setData(data.readInt32());
+                sendEvent(1, 0);
+            }
+
             break;
 
-        case GET_DATA_TRANSACTION:
+        case GET_DATA_TRANSACTION: {
             reply->writeInt32(getData());
             sendEvent(2, 0);
+            }
+
             break;
 
-        case SET_NOTIFY_TRANSACTION:
+        case SET_NOTIFY_TRANSACTION: {
             sp < IBinder > binder = data.readStrongBinder();
             setBinderNotify(binder);
             sendEvent(3, 0);
+            }
+
             break;
+
+        case GET_PROCINFO_TRANSACTION: {
+            procInfo * procinfo = getServiceInfo();
+            reply->writeInt32(procinfo->pid);
+            reply->writeCString(procinfo->procName);
+            reply->writeCString(procinfo->serviceName);
+            sendEvent(4, 0);
+            }
+            break;
+
+        default:
+            return BBinder::onTransact(code, data, reply, flags);
     }
 
     return 0;
